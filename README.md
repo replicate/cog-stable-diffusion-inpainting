@@ -1,0 +1,1 @@
+# cog-stable-diffusion-inpainting
