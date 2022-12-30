@@ -37,7 +37,7 @@ class Predictor(BasePredictor):
             description="Inital image to generate variations of. Supproting images size with 512x512",
         ),
         mask: Path = Input(
-            description="Black and white image to use as mask for inpainting over the image provided. Black pixels are inpainted and white pixels are preserved",
+            description="Black and white image to use as mask for inpainting over the image provided. White pixels are inpainted and black pixels are preserved",
         ),
         num_outputs: int = Input(
             description="Number of images to output. Higher number of outputs may OOM.",
