@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import os
-from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionInpaintPipeline
 
 
 model_id = "stabilityai/stable-diffusion-2-inpainting"
 MODEL_CACHE = "diffusers-cache"
 os.makedirs(MODEL_CACHE, exist_ok=True)
 
-pipe = DiffusionPipeline.from_pretrained(
+pipe = StableDiffusionInpaintPipeline.from_pretrained(
     model_id,
     cache_dir=MODEL_CACHE,
 )
