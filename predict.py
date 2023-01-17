@@ -2,7 +2,7 @@ import os
 from typing import List
 
 import torch
-from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionInpaintPipeline
 
 from PIL import Image
 from cog import BasePredictor, Input, Path
@@ -15,7 +15,7 @@ class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
         print("Loading pipeline...")
-        self.pipe = DiffusionPipeline.from_pretrained(
+        self.pipe = StableDiffusionInpaintPipeline.from_pretrained(
             MODEL_ID,
             cache_dir=MODEL_CACHE,
             local_files_only=True,
@@ -29,15 +29,15 @@ class Predictor(BasePredictor):
             description="Input prompt",
             default="a photo of an astronaut riding a horse on mars",
         ),
+        negative_prompt: str = Input(
+            description="Specify things to not see in the output",
+            default=None
+        ),
         image: Path = Input(
             description="Inital image to generate variations of. Supproting images size with 512x512",
         ),
         mask: Path = Input(
-            description="Black and white image to use as mask for inpainting over the image provided. Black pixels are inpainted and white pixels are preserved",
-        ),
-        prompt_strength: float = Input(
-            description="Prompt strength when providing the image. 1.0 corresponds to full destruction of information in init image",
-            default=0.8,
+            description="Black and white image to use as mask for inpainting over the image provided. White pixels are inpainted and black pixels are preserved",
         ),
         num_outputs: int = Input(
             description="Number of images to output. Higher number of outputs may OOM.",
@@ -63,14 +63,16 @@ class Predictor(BasePredictor):
         image = Image.open(image).convert("RGB").resize((512, 512))
         extra_kwargs = {
             "mask_image": Image.open(mask).convert("RGB").resize(image.size),
-            "image": image,
-            "strength": prompt_strength,
+            "image": image
         }
 
         generator = torch.Generator("cuda").manual_seed(seed)
 
         output = self.pipe(
             prompt=[prompt] * num_outputs if prompt is not None else None,
+            negative_prompt=[negative_prompt] * num_outputs
+            if negative_prompt is not None
+            else None,
             guidance_scale=guidance_scale,
             generator=generator,
             num_inference_steps=num_inference_steps,
